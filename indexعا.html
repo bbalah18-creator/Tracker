@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Study Progress Tracker</title>
+<style>
+:root{--bg:#f6f4ee;--card:rgba(255,255,255,.82);--fg:#141a2e;--mut:#6b7186;--line:rgba(20,26,46,.11);--gold:#a8791c;--gold2:#d9a93a;--hd:#141a2e;--ok:#1f9d6b;--sub:rgba(20,26,46,.05);--glow1:rgba(120,100,255,.14);--glow2:rgba(217,169,58,.18);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#080b16;--card:rgba(22,28,52,.72);--fg:#eef0f8;--mut:#98a0bd;--line:rgba(255,255,255,.09);--gold:#f0cd7a;--gold2:#c9973a;--hd:#0c1226;--ok:#34d399;--sub:rgba(255,255,255,.04);--glow1:rgba(110,90,255,.22);--glow2:rgba(217,169,58,.14)}}
+:root[data-theme="dark"]{--bg:#080b16;--card:rgba(22,28,52,.72);--fg:#eef0f8;--mut:#98a0bd;--line:rgba(255,255,255,.09);--gold:#f0cd7a;--gold2:#c9973a;--hd:#0c1226;--ok:#34d399;--sub:rgba(255,255,255,.04);--glow1:rgba(110,90,255,.22);--glow2:rgba(217,169,58,.14)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.4;background:radial-gradient(900px 500px at 85% -5%,var(--glow1),transparent),radial-gradient(800px 500px at -5% 5%,var(--glow2),transparent),var(--bg);background-attachment:fixed;min-height:100vh}
+.page{max-width:940px;margin:0 auto;padding:18px 12px 40px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:700;letter-spacing:-.5px;margin:0;background:linear-gradient(90deg,var(--gold),var(--gold2) 60%,var(--fg));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);font-size:12px;margin-top:4px;letter-spacing:.3px}
+.fields{display:flex;gap:12px}
+.fields label{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;display:flex;flex-direction:column;gap:3px}
+.fields input{border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-size:15px;padding:3px 0;width:130px;outline:none;transition:border-color .2s}
+.fields input:focus{border-color:var(--gold2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.12)}
+.sum{padding:18px;margin-bottom:14px;display:grid;grid-template-columns:130px 1fr;gap:20px;align-items:center}
+.ring{position:relative;width:130px;height:130px}
+.ring svg{width:100%;height:100%}
+.rt{fill:none;stroke:var(--line);stroke-width:9}
+.rf{fill:none;stroke:url(#g);stroke-width:9;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7;transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)}
+.ring div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-family:Georgia,serif;font-size:30px;letter-spacing:-1px}
+.ring span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 16px}
+.st{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px}
+.st b{display:block;color:var(--fg);font-size:17px;font-weight:600;margin:1px 0 6px;text-transform:none;letter-spacing:0}
+.st:last-child{grid-column:1/-1}
+.bar{height:5px;background:var(--sub);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:4px;transition:width .5s}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;font:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--mut);cursor:pointer;transition:all .15s}
+.tab:hover{color:var(--fg)}
+.tab.on{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1405;border-color:transparent}
+.ctl{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.ctl input[type=search]{flex:1;min-width:150px;font:inherit;padding:9px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);outline:none}
+.ctl input[type=search]:focus{border-color:var(--gold2)}
+.sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);cursor:pointer;user-select:none}
+.sw input{appearance:none;-webkit-appearance:none;width:38px;height:22px;border-radius:12px;background:var(--line);position:relative;margin:0;cursor:pointer;transition:background .2s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw input:checked{background:var(--gold2)}
+.sw input:checked::after{transform:translateX(16px)}
+.tw{overflow:clip;border-radius:18px}
+table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed}
+thead th{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--hd);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;padding:12px 2px;text-align:center}
+thead th:first-child{text-align:left;padding-left:16px}
+th.n,td.c{width:50px}
+td{padding:10px 2px;border-bottom:1px solid var(--line)}
+td.t{padding:10px 8px 10px 16px;box-shadow:inset 3px 0 0 color-mix(in srgb,var(--a) 55%,transparent)}
+td.t em{font-style:normal;color:var(--mut);font-size:11px;font-variant-numeric:tabular-nums;margin-right:8px}
+td.t small{display:block;color:var(--mut);font-size:11px;margin:1px 0 0 25px}
+td.c{text-align:center}
+tr.s td{padding:0;cursor:pointer;user-select:none;background:linear-gradient(90deg,color-mix(in srgb,var(--a) 22%,transparent),var(--sub));border-bottom:1px solid var(--line)}
+.sh{display:flex;align-items:center;gap:10px;padding:13px 14px}
+.sh strong{font-family:Georgia,serif;font-size:16px;letter-spacing:.3px}
+.sh .m{color:var(--mut);font-size:12px}
+.sh .bar{width:64px;margin-left:auto}
+.sh .bar i{background:var(--a)}
+.sh .p{font-size:12px;font-weight:700;width:36px;text-align:right;color:var(--a)}
+.chev{display:inline-block;width:8px;height:8px;border-right:2px solid var(--a);border-bottom:2px solid var(--a);transform:rotate(45deg);transition:transform .15s;margin:0 2px 3px 0}
+tr.s.cl .chev{transform:rotate(-45deg)}
+tr.k td{padding:7px 16px;font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--a);background:var(--sub)}
+tr.d td{background:color-mix(in srgb,var(--a) 11%,transparent)}
+tr.d td.t{opacity:.72}
+tr:not(.s):not(.k):hover td{background:var(--sub)}
+tr.d:hover td{background:color-mix(in srgb,var(--a) 15%,transparent)}
+[hidden]{display:none!important}
+input[type=checkbox]{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin:0;border:1.5px solid var(--mut);border-radius:7px;background:transparent;cursor:pointer;vertical-align:middle;transition:transform .12s,background .15s,border-color .15s}
+input[type=checkbox]:active{transform:scale(.85)}
+input[type=checkbox]:checked{background:var(--a) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/15px no-repeat;border-color:var(--a)}
+.empty{padding:30px;text-align:center;color:var(--mut)}
+.tools{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;margin-top:14px}
+button.rs{font:inherit;font-size:12px;background:transparent;color:var(--mut);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+@media(max-width:560px){.sum{grid-template-columns:1fr;justify-items:center}.stats{width:100%}h1{font-size:25px}}
+.secs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.sc{font:inherit;text-align:left;color:var(--fg);padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s;display:flex;flex-direction:column;gap:4px}
+.sc:hover{transform:translateY(-2px)}
+.sc small{color:var(--mut);font-size:11px;letter-spacing:.4px}
+.sc small:first-child{font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:10px}
+.sc b{font-family:Georgia,serif;font-size:24px;letter-spacing:-.5px}
+.sc.on{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2),0 10px 30px rgba(217,169,58,.18)}
+.sc.on small:first-child{color:var(--gold)}
+@media(max-width:560px){.secs{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><div class="page">
+<header><div><h1>Study Progress Tracker</h1><div class="sub">Histology · Biochemistry · Genetics · Anatomy · Embryology · Physiology · PCM</div></div>
+<div class="fields"><label>Name<input id="nm" autocomplete="off"></label><label>Term<input id="tm" autocomplete="off"></label></div></header>
+<div class="secs" id="secs"></div>
+<section class="card sum"><div class="ring"><svg viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5d98b"/><stop offset="1" stop-color="#c9973a"/></linearGradient></defs><circle class="rt" cx="60" cy="60" r="52"/><circle class="rf" id="rg" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/></svg><div><b id="pt">0%</b><span id="pc"></span></div></div><div class="stats" id="st"></div></section>
+<div class="tabs" id="tabs"></div>
+<div class="ctl"><input type="search" id="q" placeholder="Search lectures, cases, practicals..."><label class="sw"><input type="checkbox" id="hd">Hide completed</label></div>
+<div class="card tw"><table><thead><tr><th>Topic</th><th class="n">Watch</th><th class="n">Study</th><th class="n">Solved</th><th class="n">Revise 1</th><th class="n">Revise 2</th></tr></thead><tbody id="tb"></tbody></table><div class="empty" id="em" hidden>No matching items</div></div>
+<noscript><div class="card" style="padding:22px;margin:14px 0;text-align:center"><b>This preview cannot run the tracker.</b><br>Open this page in Safari (Share, then Open in Safari) or from your hosted link.</div></noscript>
+<div class="tools"><span id="ft"></span><button class="rs" id="rs">Reset progress</button></div>
+</div>
+<script>
+const D={
+"Histology":["Cell Structure 1 (Cell Membrane & Mitochondria)","Cell Structure 2 (Ribosomes, ER, Golgi apparatus & Lysosomes)","Cell Structure 3 (Cytoskeleton)","Cell Structure 4 (Cell Inclusions & Nucleus)","Cell Cycle & Cell Division","Karyotyping-Structure & Classification of Chromosomes","Epithelium (1)","Epithelium (2)","Connective Tissue (1)","Connective Tissue (2)","Nervous Tissue (1)","Nervous Tissue (2)","Skin (1)","Skin (2)"],
+"Biochemistry":["Monosaccharide","Disaccharide and derived sugars","Polysaccharide","Fatty acid and simple lipid","Derived lipid","Compound lipid","Amino acids","Protein classifications","Biochemistry of enzymes 1","Biochemistry of enzymes 2","Biomedical significance of enzymes","Protein structure","Protein folding and misfolding"],
+"Genetics":["Nucleic acids","DNA packaging","Principle of heredity and family pedigree","DNA replication","Transcription","Post-transcription modification","Translation","Regulation of protein synthesis and Post-translational modification","DNA repair","DNA mutations","DNA mutations and cancer genetics"],
+"Anatomy":["Anatomy Terminology","Skeletal system","Joints","Introduction to nervous system","Anatomical divisions of nervous system","Digestive system","Muscle & fascia","Respiratory system","CVS","Urinary system","Lymphatic system","Neck vessels","Scalp & face I (Soft tissue)","Scalp & face II (Blood supply)","Scalp & face III (Nerve supply)"],
+"Embryology":["Male & female genital systems","Gametogenesis","Female cycles","First week of development","Second week of development","Third week of development","Folding & neural tube development","Fetal membranes I (amnion-yolk sac)","Fetal membranes II (chorion-U. cord)","Placenta & twins"],
+"Physiology":["Functional organization of human body & fluids","Transport thorough cell membrane","Intercellular connections","Functional divisions of nervous system","General characters of ANS","Sympathetic NS to head & neck & disorders","Sympathetic supply to thorax, abdomen, pelvis","Parasympathetic supply to head, thorax, abdomen","Higher control of ANS functions","Functions of ANS under different conditions","Cholinergic transmission & receptors","Adrenergic transmission & receptors","Equilibrium potential & Nernst equation","Ionic basis & recording of action potentials","Nerve fiber changes, types & excitability","Synaptic transmission & postsynaptic potentials","Physics of blood flow & vascular compliance","Fluid filtration dynamics & interstitial drainage"],
+"PCM":["Introduction to professionalism","E-professionalism & telemedicine","Reflection and self-regulation","Social accountability & Study wellbeing","Introduction to medical ethics","physician’s duties and rights","Informed consent","Confidentiality","Successful communication","physician’s - patient communication","Team work & Team composition","Conflict management","Communication in cultural diversity","Dealing with difficult personalities"]};
+const X={
+Histology:["#a78bfa",[["Online Cases",["Gaucher's disease|Cell Structure 2","Kartagener's syndrome|Cell Structure 3 (Cytoskeleton)","Turner's syndrome|Cell Cycle, Cell Division & Chromosomes","Tongue cancer|Epithelium","Hypertrophic skin scar|Connective tissue","Multiple sclerosis|Nervous tissue","Psoriasis|Skin"]],["Practical",["Microtechniques & Microscopy","Cell Structure (Membranous & Non-Membranous Organelles)","Nucleus & Cell division","Karyotyping & Chromosomal abnormalities","Epithelium","Connective tissue","Nervous tissue","Skin"]]]],
+Biochemistry:["#22d3ee",[["Online Cases",["Type 2 Diabetes Mellitus|Monosaccharides","Lactose intolerance|Disaccharide","Constipation|Disaccharide and polysaccharides","Atherosclerosis|Compound lipids","Niemann Pick disease|Compound lipid","Neonatal Respiratory Distress Syndrome|Compound lipids","Acute hepatitis|Biomedical significance of enzymes","Alzheimer's disease|Protein folding"]],["Practical",["Lab safety","Sampling","Types of solutions and osmolarity","Glucose detection in body fluid","Protein detection in body fluid","Clinical application of factors affecting enzyme action (starch amylase)"]]]],
+Genetics:["#f472b6",[["Online Cases",["Cystic fibrosis|Principles of heredity & family pedigree","Sickle cell anaemia|Principles of heredity","Anticancer therapy|DNA replication","End replication problem|DNA replication","Diphtheria|Regulation of protein synthesis","Familial Mediterranean Fever|Mutation","β-Thalassemia|Mutation","Hepatocellular carcinoma with chronic hepatitis C|Mutation"]],["Practical",["Pipetting","DNA extraction","PCR","Gel electrophoresis","Overview on molecular lab instrumentation"]],["CBL",["Down Syndrome"]],["Assignment",["Draw and Label a Diagram of Spinal Ganglia"]]]],
+Anatomy:["#fbbf24",[["Online Cases",["Fracture leg bone & shoulder dislocation|Skeletal system & joints","Brain tumor & Muscle rupture|Nervous divisions & muscle","Cancer colon|Digestive system","Azoospermia & Loin pain|Genital & Urinary systems","Massive hemorrhage & Foreign body aspiration|CVS & Respiratory system","Scalp wound & Slurred speech|Scalp & Great neck vessels","Trigeminal neuralgia & Dangerous triangle of face|Face & scalp"]],["Practical",["Axial skeleton & Mandible + features of vertebrae","Appendicular skeleton 1 (Upper Limb)","Appendicular skeleton 2 (Lower Limb)","Nervous & Digestive Systems","Genitourinary System","Respiratory & Cardiovascular Systems","Skull 1","Skull 2","Scalp","Face"]]]],
+Embryology:["#34d399",[["Online Cases",["Placenta Previa|2nd week of pregnancy","Conjoined twins|Twins"]],["Practical",["Ovarian follicles, mature sperm, blastocyst formation, implantation","Gastrulation, Folding and neural tube formation","Features of placenta, umbilical cord & twins"]],["CBL",["Abortion"]]]],
+Physiology:["#60a5fa",[["Online Cases",["Dehydration|Functional organization of the human body","Gastric ulcer|Transport through the cell membrane","Heart failure|Transport through the cell membrane","Horner's syndrome|Sympathetic NS to head and neck","Pheochromocytoma|Sympathetic supply to thorax, abdomen, pelvis","Primary focal hyperhidrosis|Sympathetic supply to thorax, abdomen, pelvis","Organophosphates poisoning|Cholinergic transmission","Myasthenia gravis|Cholinergic transmission","Raynaud's disease|Adrenergic transmission","Periodic paralysis|Equilibrium potential","Multiple sclerosis|Ionic basis & action potentials","Nerve block|Changes in nerve fibers during action potentials","Edema|Dynamics of filtration of fluids"]],["Practical",["Calculation of body fluids","Types of physiological solutions and how to prepare","Calculation of osmolarity and change in cell volume","Fight flight response and biofeedback by Biopac","Modulation of autonomic receptors (Virtual labs)","Types of stimuli and gradation of electric response (Virtual labs)","Ion channels and nerve block by Virtual labs","Nerve conduction velocity by Biopac 1","Nerve conduction velocity by Biopac 2"]],["CBL",["Diabetic Poly Neuropathy"]],["SDL",["COVID-19 Protective Measures Course (Incision Academy)"]]]],
+PCM:["#fb923c",[]]};
+const COLS=["Watch","Study","Solved","Revise 1","Revise 2"],KI=[0,1,4,2,3];
+const TYPES=[{id:"Lectures",n:["Lectures"]},{id:"Online Cases",n:["Online Cases"]},{id:"Practical",n:["Practical"]},{id:"CBL & More",n:["CBL","SDL","Assignment"]}];
+const SEC=[];for(const s in D){SEC.push({s,c:X[s][0],g:[["Lectures",D[s]],...X[s][1]]})}
+const K="study-tracker-v1",K2="study-tracker-meta-v2";let S={},M={cl:{},sec:"Lectures",sub:"All",hd:false};
+try{S=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
+try{M=Object.assign(M,JSON.parse(localStorage.getItem(K2)||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}},saveM=()=>{try{localStorage.setItem(K2,JSON.stringify(M))}catch(e){}};
+const $=id=>document.getElementById(id),tb=$("tb"),kid=(s,n)=>n==="Lectures"?s:s+"~"+n;
+const ty=()=>TYPES.find(t=>t.id===M.sec)||TYPES[0];
+const gs=(t,o)=>o.g.filter(x=>t.n.includes(x[0]));
+function stat(t,only){let n=0,done=0;const col=[0,0,0,0,0];
+for(const o of SEC){if(only&&o.s!==only)continue;for(const [sn,l] of gs(t,o))l.forEach((x,i)=>{n++;for(let j=0;j<5;j++)if(S[`${kid(o.s,sn)}-${i}-${j}`]){done++;col[j]++}})}
+return{n,done,col,p:n?Math.round(done/(n*5)*100):0}}
+let ALL=0;TYPES.forEach(t=>ALL+=stat(t).n);
+function build(){const t=ty(),subs=SEC.filter(o=>gs(t,o).length);
+if(M.sub!=="All"&&!subs.some(o=>o.s===M.sub))M.sub="All";
+let h="";
+for(const o of subs){if(M.sub!=="All"&&M.sub!==o.s)continue;const st=`style="--a:${o.c}"`,n=gs(t,o).reduce((a,x)=>a+x[1].length,0),ck=t.id+"|"+o.s;
+h+=`<tr class="s${M.cl[ck]?" cl":""}" data-s="${o.s}" ${st}><td colspan="6"><div class="sh"><span class="chev"></span><strong>${o.s}</strong><span class="m">${n} items</span><div class="bar"><i id="b-${o.s}"></i></div><span class="p" id="g-${o.s}"></span></div></td></tr>`;
+for(const [sn,items] of gs(t,o)){if(t.n.length>1)h+=`<tr class="k" data-g="${o.s}" ${st}><td colspan="6">${sn} · ${items.length}</td></tr>`;
+items.forEach((x,i)=>{const [a,b]=x.split("|"),k=kid(o.s,sn);
+h+=`<tr data-g="${o.s}" data-r="${k}-${i}" data-t="${x.toLowerCase()}" ${st}><td class="t"><em>${String(i+1).padStart(2,"0")}</em>${a}${b?`<small>Applied case on ${b}</small>`:""}</td>`+COLS.map((c,j)=>`<td class="c"><input type="checkbox" aria-label="${c}" data-k="${k}-${i}-${KI[j]}" ${S[`${k}-${i}-${KI[j]}`]?"checked":""}></td>`).join("")+"</tr>"})}}
+tb.innerHTML=h;
+$("tabs").innerHTML=["All",...subs.map(o=>o.s)].map(x=>`<button class="tab${M.sub===x?" on":""}" data-t="${x}">${x}</button>`).join("");
+$("ft").textContent=`${ALL} items · ${SEC.length} subjects`}
+function upd(){const t=ty();
+$("secs").innerHTML=TYPES.map(x=>{const s=stat(x);return `<button class="sc${x.id===t.id?" on":""}" data-s="${x.id}"><small>${x.id}</small><b>${s.p}%</b><div class="bar"><i style="width:${s.p}%"></i></div><small>${s.n} items</small></button>`}).join("");
+const s=stat(t);
+$("pt").textContent=s.p+"%";$("pc").textContent=`${t.id} · ${s.done}/${s.n*5}`;$("rg").style.strokeDashoffset=326.7*(1-(s.n?s.done/(s.n*5):0));
+$("st").innerHTML=COLS.map((c,j)=>`<div class="st">${c}<b>${s.col[KI[j]]} / ${s.n}</b><div class="bar"><i style="width:${s.n?s.col[KI[j]]/s.n*100:0}%"></i></div></div>`).join("");
+SEC.forEach(o=>{const e=$("g-"+o.s);if(e){const p=stat(t,o.s).p;e.textContent=p+"%";$("b-"+o.s).style.width=p+"%"}});
+tb.querySelectorAll("tr[data-r]").forEach(r=>{let c=0;for(let j=0;j<5;j++)if(S[`${r.dataset.r}-${j}`])c++;r.classList.toggle("d",c==5);r.dataset.d=c==5?1:""});
+filt()}
+function filt(){const q=$("q").value.trim().toLowerCase(),hd=M.hd;let v=0;
+tb.querySelectorAll("tr").forEach(r=>{if(r.classList.contains("s")){r.hidden=false;return}
+const g=r.dataset.g;let show=!M.cl[M.sec+"|"+g];
+if(r.classList.contains("k")){if(q||hd)show=false}else{if(q&&!r.dataset.t.includes(q))show=false;if(hd&&r.dataset.d)show=false;if(show)v++}
+r.hidden=!show});$("em").hidden=v>0}
+tb.addEventListener("change",e=>{const k=e.target.dataset.k;if(!k)return;if(e.target.checked)S[k]=1;else delete S[k];save();upd()});
+tb.addEventListener("click",e=>{const h=e.target.closest("tr.s");if(!h)return;const ck=M.sec+"|"+h.dataset.s;M.cl[ck]=!M.cl[ck];saveM();h.classList.toggle("cl",!!M.cl[ck]);filt()});
+$("secs").addEventListener("click",e=>{const b=e.target.closest(".sc");if(!b)return;M.sec=b.dataset.s;M.sub="All";saveM();build();upd()});
+$("tabs").addEventListener("click",e=>{const t=e.target.dataset.t;if(!t)return;M.sub=t;saveM();build();upd()});
+$("q").addEventListener("input",filt);
+$("hd").checked=!!M.hd;$("hd").addEventListener("change",e=>{M.hd=e.target.checked;saveM();filt()});
+["nm","tm"].forEach(id=>{$(id).value=M[id]||"";$(id).addEventListener("input",e=>{M[id]=e.target.value;saveM()})});
+$("rs").onclick=()=>{if(confirm("Reset all progress?")){S={};save();build();upd()}};
+build();upd();
+
+/* Visitor counter: put your GoatCounter code between the quotes, e.g. "mytracker" */
+const GC="";
+if(GC){try{const e=document.createElement("script");e.async=true;e.dataset.goatcounter="https://"+GC+".goatcounter.com/count";e.src="https://gc.zgo.at/count.js";document.head.appendChild(e)}catch(x){}}
+</script></body></html>
